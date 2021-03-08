@@ -14,6 +14,8 @@ from learner import *
 from evaluator import evaluator
 from datetime import datetime, timedelta
 
+from kaggle_environments import make
+
 
 def save_args(arg_dict):
     os.makedirs(arg_dict["log_dir"])
@@ -32,10 +34,10 @@ def copy_models(dir_src, dir_dst): # src: source, dst: destination
         shutil.copyfile(os.path.join(dir_src, m), os.path.join(dir_dst, m))
     print(f"{len(l_cands)} models copied in the given directory")
     
-def main(arg_dict):
+def main(arg_dict, model_name):
     os.environ['OPENBLAS_NUM_THREADS'] = '1'
-    cur_time = datetime.now() + timedelta(hours = 9)
-    arg_dict["log_dir"] = "logs/" + cur_time.strftime("[%m-%d]%H.%M.%S")
+    cur_time = datetime.now()
+    arg_dict["log_dir"] = "logs/" + model_name + "_" + cur_time.strftime("%m-%d_%H.%M.%S")
     save_args(arg_dict)
     if arg_dict["trained_model_path"] and 'kaggle' in arg_dict['env']: 
         copy_models(os.path.dirname(arg_dict['trained_model_path']), arg_dict['log_dir'])
@@ -97,6 +99,51 @@ def main(arg_dict):
     for p in processes:
         p.join()
     
+def train(model_name, start_model="football-paris/kaggle_simulations/agent/model_133997184.tar"):
+    arg_dict = {
+        "env": "11_vs_11_kaggle",    
+        # "11_vs_11_kaggle" : environment used for self-play training
+        # "11_vs_11_stochastic" : environment used for training against fixed opponent(rule-based AI)
+        "num_processes": 2,  # should be less than the number of cpu cores in your workstation.
+        "batch_size": 16,   
+        "buffer_size": 6,
+        "rollout_len": 30,
+
+        "lstm_size" : 256,
+        "k_epoch" : 3,
+        "learning_rate" : 0.0001,
+        "gamma" : 0.993,
+        "lmbda" : 0.96,
+        "entropy_coef" : 0.0001,
+        "grad_clip" : 3.0,
+        "eps_clip" : 0.1,
+
+        "summary_game_window" : 10, 
+        "model_save_interval" : 150000,  # number of gradient updates bewteen saving model
+
+        "trained_model_path" : start_model, # use when you want to continue traning from given model.
+        "latest_ratio" : 0.5, # works only for self_play training. 
+        "latest_n_model" : 10, # works only for self_play training. 
+        "print_mode" : False,
+
+        "encoder" : "encoder_basic",
+        "rewarder" : "custom_reward",
+        "model" : "conv1d",
+        "algorithm" : "ppo",
+
+        "env_evaluation":'11_vs_11_hard_stochastic'  # for evaluation of self-play trained agent (like validation set in Supervised Learning)
+    }
+    main(arg_dict, model_name)
+
+from shutil import copy
+def visualize(model_path):
+    copy(model_path, "football-paris/kaggle_simulations/agent/custom.tar") 
+
+    env = make("football", debug=True, configuration={"save_video": True, "scenario_name": "11_vs_11_kaggle", "debug":True,"running_in_notebook": True})
+
+
+    env.run(["football-paris/kaggle_simulations/agent/main.py", "football-paris/kaggle_simulations/agent/main.py"])
+    env.render(mode="human", width=400, height=300)
 
 if __name__ == '__main__':
 
@@ -104,8 +151,8 @@ if __name__ == '__main__':
         "env": "11_vs_11_kaggle",    
         # "11_vs_11_kaggle" : environment used for self-play training
         # "11_vs_11_stochastic" : environment used for training against fixed opponent(rule-based AI)
-        "num_processes": 30,  # should be less than the number of cpu cores in your workstation.
-        "batch_size": 32,   
+        "num_processes": 2,  # should be less than the number of cpu cores in your workstation.
+        "batch_size": 16,   
         "buffer_size": 6,
         "rollout_len": 30,
 
@@ -136,6 +183,3 @@ if __name__ == '__main__':
     
     main(arg_dict)
     
-    
-        
-        

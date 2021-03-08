@@ -320,7 +320,7 @@ arg_dict = {
     "lmbda" : 0.96,
     "entropy_coef" : 0.0,
     "move_entropy_coef" : 0.0,
-    "trained_model_path" : "kaggle_simulations/agent/model_133997184.tar",
+    "trained_model_path" : "football-paris/kaggle_simulations/agent/custom.tar",
     "k_epoch" : 3,
     
     "arg_max" : True
