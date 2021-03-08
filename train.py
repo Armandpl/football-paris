@@ -104,7 +104,7 @@ def train(model_name, start_model="football-paris/kaggle_simulations/agent/model
         "env": "11_vs_11_kaggle",    
         # "11_vs_11_kaggle" : environment used for self-play training
         # "11_vs_11_stochastic" : environment used for training against fixed opponent(rule-based AI)
-        "num_processes": 2,  # should be less than the number of cpu cores in your workstation.
+        "num_processes": 1,  # should be less than the number of cpu cores in your workstation.
         "batch_size": 16,   
         "buffer_size": 6,
         "rollout_len": 30,
