@@ -136,13 +136,17 @@ def train(model_name, start_model="football-paris/kaggle_simulations/agent/model
     main(arg_dict, model_name)
 
 from shutil import copy
-def visualize(model_path):
+def visualize(model_path, opp=None):
     copy(model_path, "football-paris/kaggle_simulations/agent/custom.tar") 
 
     env = make("football", debug=True, configuration={"save_video": True, "scenario_name": "11_vs_11_kaggle", "debug":True,"running_in_notebook": True})
 
 
-    env.run(["football-paris/kaggle_simulations/agent/main.py", "football-paris/kaggle_simulations/agent/main.py"])
+    if opp is None:
+        env.run(["football-paris/kaggle_simulations/agent/main.py", "football-paris/kaggle_simulations/agent/main.py"])
+    else:
+        env.run(["football-paris/kaggle_simulations/agent/main.py", opp])
+
     env.render(mode="human", width=400, height=300)
 
 if __name__ == '__main__':
